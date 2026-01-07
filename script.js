@@ -1,7 +1,7 @@
 const map = L.map("map").setView([20, 0], 2);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap contributors",
+  attribution: "© OpenStreetMap contributors"
 }).addTo(map);
 
 fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
@@ -30,27 +30,46 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
       style: styleFeature,
       onEachFeature: (feature, layer) => {
         const name = feature.properties.name;
+
         if (countryData[name]) {
-          layer.on("click", () => {
+          layer.on("click", (e) => {
             const d = countryData[name];
-            layer.bindPopup(`
-              <b>${name}</b><br/><br/>
+            const s = d.scores;
 
-              <b>KYLR Market Attractiveness Score:</b>
-              <span style="font-size:16px; color:#c2185b;">
-                ${d.finalScore} / 100
-              </span>
-              <br/><br/>
+            const priorityLine = d.priority
+              ? `<div style="color:#c2185b; font-weight:bold;">${d.priorityRank}</div>`
+              : "";
 
-              <b>FTA / Trade:</b> ${d.fta}<br/>
-              <b>Duty Trend:</b> ${d.duty}<br/>
-              <b>Trade Stability:</b> ${d.trade}<br/>
-              <b>Logistics:</b> ${d.logistics}<br/>
-              <b>Demand Readiness:</b> ${d.demand}<br/>
-              <b>Economic Value:</b> ${d.economic}<br/>
-              <b>Brand & Cultural Fit:</b> ${d.brand}<br/>
-              <b>Premium Growth & Pricing Power:</b> ${d.premium}
-            `).openPopup();
+            const popupContent = `
+              <div style="min-width:220px">
+                <div style="font-size:16px; font-weight:bold;">
+                  ${name}
+                </div>
+
+                ${priorityLine}
+
+                <div style="margin:6px 0; font-size:15px;">
+                  <b>Total Market Score:</b>
+                  <span style="color:#c2185b">${d.finalScore} / 100</span>
+                </div>
+
+                <hr/>
+
+                <b>Parameter Scores</b><br/>
+                Demand Readiness: ${s.demandReadiness}/10<br/>
+                Economic & Trade Viability: ${s.economicTrade}/10<br/>
+                Brand & Cultural Fit: ${s.brandCulturalFit}/10<br/>
+                Premium Growth & Pricing Power: ${s.premiumGrowth}/10<br/>
+                Logistics Reliability: ${s.logistics}/10<br/>
+                Trade Stability: ${s.tradeStability}/10<br/>
+                Duty Impact (Inverse): ${s.dutyImpact}/10
+              </div>
+            `;
+
+            L.popup({ closeButton: true })
+              .setLatLng(e.latlng)
+              .setContent(popupContent)
+              .openOn(map);
           });
         }
       }
