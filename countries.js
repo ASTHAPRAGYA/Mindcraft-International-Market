@@ -1,80 +1,98 @@
 const countryData = {
   "Japan": {
     finalScore: 86,
+    priorityRank: "Priority 1",
     priority: true,
-    fta: "No FTA, but low non-tariff friction",
-    duty: "Moderate, stable",
-    trade: "Very high stability",
-    logistics: "Excellent reliability, premium-friendly",
-    demand: "High demand for ethical, minimal streetwear",
-    economic: "High discretionary spend",
-    brand: "Strong appreciation for craft & authenticity",
-    premium: "High AOV, premium segments growing ~10%"
-  },
 
-  "Germany": {
-    finalScore: 83,
-    priority: true,
-    fta: "EU–India trade facilitation (partial)",
-    duty: "Moderate but predictable",
-    trade: "Very stable",
-    logistics: "Best-in-class EU logistics",
-    demand: "Strong sustainability-first consumers",
-    economic: "High purchasing power",
-    brand: "High trust in ethical fashion brands",
-    premium: "Premium sustainable fashion growing 9–11%"
+    scores: {
+      demandReadiness: 9,
+      economicTrade: 8,
+      brandCulturalFit: 9,
+      premiumGrowth: 8,
+      logistics: 9,
+      tradeStability: 9,
+      dutyImpact: 7
+    },
+
+    notes: {
+      fta: "Low non-tariff barriers, stable trade relations",
+      demand: "High appreciation for ethical streetwear",
+      brand: "Strong craft & authenticity pull"
+    }
   },
 
   "United Kingdom": {
-    finalScore: 81,
+    finalScore: 83,
+    priorityRank: "Priority 2",
     priority: true,
-    fta: "India–UK FTA under advanced negotiations",
-    duty: "Moderate, improving outlook",
-    trade: "Stable",
-    logistics: "Efficient cross-border fulfilment",
-    demand: "High indie & streetwear adoption",
-    economic: "High online fashion spend",
-    brand: "Strong D2C brand acceptance",
-    premium: "High AOV, strong Gen Z demand"
+
+    scores: {
+      demandReadiness: 8,
+      economicTrade: 7,
+      brandCulturalFit: 8,
+      premiumGrowth: 8,
+      logistics: 8,
+      tradeStability: 8,
+      dutyImpact: 7
+    },
+
+    notes: {
+      fta: "FTA under advanced negotiations",
+      demand: "Strong indie & Gen Z adoption",
+      brand: "High D2C brand trust"
+    }
+  },
+
+  "Germany": {
+    finalScore: 81,
+    priorityRank: "Priority 3",
+    priority: true,
+
+    scores: {
+      demandReadiness: 8,
+      economicTrade: 8,
+      brandCulturalFit: 7,
+      premiumGrowth: 8,
+      logistics: 9,
+      tradeStability: 9,
+      dutyImpact: 7
+    },
+
+    notes: {
+      fta: "EU–India trade facilitation",
+      demand: "Sustainability-first consumers",
+      brand: "High trust in ethical brands"
+    }
   },
 
   "France": {
     finalScore: 74,
     priority: false,
-    fta: "EU trade framework",
-    duty: "Moderate",
-    trade: "Stable",
-    logistics: "Strong fashion distribution network",
-    demand: "High premium fashion sensitivity",
-    economic: "High luxury spending",
-    brand: "Cultural appreciation of design-led brands",
-    premium: "Premium ethical fashion growing steadily"
+
+    scores: {
+      demandReadiness: 7,
+      economicTrade: 7,
+      brandCulturalFit: 8,
+      premiumGrowth: 7,
+      logistics: 8,
+      tradeStability: 8,
+      dutyImpact: 7
+    }
   },
 
   "USA": {
     finalScore: 68,
     priority: false,
-    fta: "No FTA",
-    duty: "High and volatile",
-    trade: "Moderate stability",
-    logistics: "Expensive last-mile",
-    demand: "Strong sustainable Gen Z demand",
-    economic: "Very high AOV potential",
-    brand: "Crowded D2C landscape",
-    premium: "Premium growth high but competitive"
-  },
 
-  "Australia": {
-    finalScore: 77,
-    priority: false,
-    fta: "India–Australia ECTA",
-    duty: "Low",
-    trade: "Very stable",
-    logistics: "Reliable but long lead times",
-    demand: "Strong sustainability demand",
-    economic: "High discretionary spend",
-    brand: "High openness to new brands",
-    premium: "Premium segment growing fast"
+    scores: {
+      demandReadiness: 9,
+      economicTrade: 5,
+      brandCulturalFit: 7,
+      premiumGrowth: 9,
+      logistics: 6,
+      tradeStability: 6,
+      dutyImpact: 4
+    }
   }
 
   // Continue similarly up to 30 countries
