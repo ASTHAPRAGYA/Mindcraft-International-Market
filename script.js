@@ -8,32 +8,40 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
   .then(res => res.json())
   .then(data => {
 
+    function getCountryKey(featureName) {
+      return countryNameMap[featureName] || null;
+    }
+
     function styleFeature(feature) {
-      const name = feature.properties.name;
-      if (countryData[name]) {
+      const mappedName = getCountryKey(feature.properties.name);
+
+      if (mappedName && countryData[mappedName]) {
         return {
           color: "#333",
           weight: 1,
-          fillOpacity: 0.75,
-          fillColor: countryData[name].priority ? "#f4a3c4" : "#b7d7e8"
+          fillOpacity: 0.8,
+          fillColor: countryData[mappedName].priority
+            ? "#f4a3c4"   // 🌸 PINK for top 3
+            : "#b7d7e8"   // 🌊 blue for others
         };
       }
+
       return {
-        color: "#ccc",
+        color: "#ddd",
         weight: 0.5,
         fillOpacity: 0.2,
-        fillColor: "#eee"
+        fillColor: "#f5f5f5"
       };
     }
 
     L.geoJSON(data, {
       style: styleFeature,
       onEachFeature: (feature, layer) => {
-        const name = feature.properties.name;
+        const mappedName = getCountryKey(feature.properties.name);
 
-        if (countryData[name]) {
+        if (mappedName && countryData[mappedName]) {
           layer.on("click", (e) => {
-            const d = countryData[name];
+            const d = countryData[mappedName];
             const s = d.scores;
 
             const priorityLine = d.priority
@@ -41,9 +49,9 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
               : "";
 
             const popupContent = `
-              <div style="min-width:220px">
+              <div style="min-width:240px">
                 <div style="font-size:16px; font-weight:bold;">
-                  ${name}
+                  ${mappedName}
                 </div>
 
                 ${priorityLine}
@@ -66,7 +74,7 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
               </div>
             `;
 
-            L.popup({ closeButton: true })
+            L.popup()
               .setLatLng(e.latlng)
               .setContent(popupContent)
               .openOn(map);
