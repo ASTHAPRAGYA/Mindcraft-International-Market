@@ -28,15 +28,24 @@
     attribution: "© OpenStreetMap"
   }).addTo(map);
 
-  // SIMPLE CLICKABLE RECTANGLE
-  const testBox = L.rectangle([[30, 120], [45, 145]], {
-    color: "red",
-    fillColor: "pink",
-    fillOpacity: 0.8
-  }).addTo(map);
+ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries/JPN.geo.json")
+  .then(r => r.json())
+  .then(japanGeo => {
 
-  testBox.on("click", function () {
-    alert("CLICK WORKS");
+    const japanLayer = L.geoJSON(japanGeo, {
+      style: {
+        fillColor: "#f4a3c4",
+        fillOpacity: 0.8,
+        color: "#c2185b",
+        weight: 1
+      }
+    }).addTo(map);
+
+    japanLayer.on("click", () => {
+      alert("Japan works");
+    });
+  });
+
   });
 </script>
 
