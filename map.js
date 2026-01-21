@@ -1,6 +1,15 @@
 console.log("map.js loaded");
 
-// ---- NAME NORMALIZATION ----
+// ---------------- MAP INIT ----------------
+const map = L.map("map", {
+  doubleClickZoom: false   // IMPORTANT
+}).setView([20, 0], 2);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+// ---------------- NAME MAP ----------------
 const countryNameMap = {
   "Japan": "Japan",
   "United Kingdom": "United Kingdom",
@@ -9,33 +18,24 @@ const countryNameMap = {
   "United States of America": "USA"
 };
 
-// ---- MAP INIT ----
-const map = L.map("map").setView([20, 0], 2);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
-
-// ---- LOAD GEOJSON ----
+// ---------------- LOAD COUNTRIES ----------------
 fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
   .then(res => res.json())
   .then(geo => {
 
     console.log("GeoJSON loaded");
 
-    L.geoJSON(geo, {
+    const geoLayer = L.geoJSON(geo, {
+      interactive: true, // 🔥 CRITICAL
 
       style: feature => {
-        const geoName = feature.properties.name;
-        const mappedName = countryNameMap[geoName];
+        const mapped = countryNameMap[feature.properties.name];
 
-        if (mappedName && countryData[mappedName]) {
+        if (mapped && countryData[mapped]) {
           return {
-            fillColor: countryData[mappedName].priority
-              ? "#f4a3c4"   // pink for top 3
-              : "#b7d7e8",
+            fillColor: countryData[mapped].priority ? "#f4a3c4" : "#b7d7e8",
             fillOpacity: 0.8,
-            color: "#333",
+            color: "#222",
             weight: 1
           };
         }
@@ -43,60 +43,56 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
         return {
           fillColor: "#eeeeee",
           fillOpacity: 0.3,
-          color: "#ccc",
+          color: "#cccccc",
           weight: 0.5
         };
       },
 
       onEachFeature: (feature, layer) => {
-        const geoName = feature.properties.name;
-        const mappedName = countryNameMap[geoName];
+        const mapped = countryNameMap[feature.properties.name];
 
-        if (mappedName && countryData[mappedName]) {
+        if (mapped && countryData[mapped]) {
+
+          // bring layer above map
+          layer.bringToFront();
+
           layer.on("click", e => {
-            const d = countryData[mappedName];
+            console.log("Clicked:", mapped);
+
+            const d = countryData[mapped];
             const s = d.scores;
 
-            let popupHTML = `
+            let html = `
               <div style="min-width:240px">
-                <div style="font-size:16px;font-weight:bold;">
-                  ${mappedName}
-                </div>
+                <strong>${mapped}</strong><br/>
             `;
 
             if (d.priority) {
-              popupHTML += `
-                <div style="color:#c2185b;font-weight:bold;">
-                  ${d.priorityRank}
-                </div>
-              `;
+              html += `<span style="color:#c2185b">${d.priorityRank}</span><br/>`;
             }
 
-            popupHTML += `
-              <div style="margin:6px 0;">
-                <b>Total Market Score:</b>
-                <span style="color:#c2185b">${d.finalScore}/100</span>
-              </div>
-
+            html += `
+              <b>Total Score:</b> ${d.finalScore}/100
               <hr/>
-
-              <b>Parameter Scores</b><br/>
-              Demand Readiness: ${s.demandReadiness}/10<br/>
-              Economic & Trade: ${s.economicTrade}/10<br/>
-              Brand & Cultural Fit: ${s.brandCulturalFit}/10<br/>
-              Premium Growth: ${s.premiumGrowth}/10<br/>
+              Demand: ${s.demandReadiness}/10<br/>
+              Trade: ${s.economicTrade}/10<br/>
+              Brand Fit: ${s.brandCulturalFit}/10<br/>
+              Growth: ${s.premiumGrowth}/10<br/>
               Logistics: ${s.logistics}/10<br/>
-              Trade Stability: ${s.tradeStability}/10<br/>
-              Duty Impact (Inverse): ${s.dutyImpact}/10
+              Stability: ${s.tradeStability}/10<br/>
+              Duty Impact: ${s.dutyImpact}/10
               </div>
             `;
 
-            L.popup()
+            L.popup({ closeButton: true })
               .setLatLng(e.latlng)
-              .setContent(popupHTML)
+              .setContent(html)
               .openOn(map);
           });
         }
       }
-    }).addTo(map);
+    });
+
+    geoLayer.addTo(map);
+    geoLayer.bringToFront(); // 🔥 ensures click priority
   });
