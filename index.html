@@ -1,26 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>KYLR Global Expansion Map</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <title>KYLR Map Test</title>
+
+  <!-- Leaflet CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
+
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    #map { height: 90vh; width: 100%; }
+  </style>
 </head>
+
 <body>
 
-<h1>KYLR Fashion – Global Market Evaluation Map</h1>
-<p class="subtitle">
-  Click a country to view KYLR-specific expansion parameters
-</p>
-
+<h2 style="text-align:center;">KYLR Interactive Map</h2>
 <div id="map"></div>
 
+<!-- Leaflet JS (MUST be before our script) -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="countries.js"></script>
-<script src="script.js"></script>
+
+<!-- Our script -->
+<script src="map.js"></script>
 
 </body>
 </html>
