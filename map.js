@@ -1,52 +1,102 @@
-alert("map.js is running"); // YOU MUST SEE THIS
+console.log("map.js loaded");
 
-console.log("KYLR map JS loaded");
+// ---- NAME NORMALIZATION ----
+const countryNameMap = {
+  "Japan": "Japan",
+  "United Kingdom": "United Kingdom",
+  "Germany": "Germany",
+  "France": "France",
+  "United States of America": "USA"
+};
 
+// ---- MAP INIT ----
 const map = L.map("map").setView([20, 0], 2);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// TEST SHAPES (NO GEOJSON)
-const japan = L.rectangle([[30, 130], [45, 145]], {
-  color: "#c2185b",
-  fillColor: "#f4a3c4",
-  fillOpacity: 0.7
-}).addTo(map);
+// ---- LOAD GEOJSON ----
+fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
+  .then(res => res.json())
+  .then(geo => {
 
-japan.on("click", () => {
-  alert("Japan clicked");
-  L.popup()
-    .setLatLng([36, 138])
-    .setContent("<b>Japan</b><br>Priority 1<br>Score: 86")
-    .openOn(map);
-});
+    console.log("GeoJSON loaded");
 
-const uk = L.rectangle([[50, -8], [58, 2]], {
-  color: "#c2185b",
-  fillColor: "#f4a3c4",
-  fillOpacity: 0.7
-}).addTo(map);
+    L.geoJSON(geo, {
 
-uk.on("click", () => {
-  alert("UK clicked");
-  L.popup()
-    .setLatLng([54, -2])
-    .setContent("<b>United Kingdom</b><br>Priority 2<br>Score: 83")
-    .openOn(map);
-});
+      style: feature => {
+        const geoName = feature.properties.name;
+        const mappedName = countryNameMap[geoName];
 
-const germany = L.rectangle([[47, 6], [55, 15]], {
-  color: "#c2185b",
-  fillColor: "#f4a3c4",
-  fillOpacity: 0.7
-}).addTo(map);
+        if (mappedName && countryData[mappedName]) {
+          return {
+            fillColor: countryData[mappedName].priority
+              ? "#f4a3c4"   // pink for top 3
+              : "#b7d7e8",
+            fillOpacity: 0.8,
+            color: "#333",
+            weight: 1
+          };
+        }
 
-germany.on("click", () => {
-  alert("Germany clicked");
-  L.popup()
-    .setLatLng([51, 10])
-    .setContent("<b>Germany</b><br>Priority 3<br>Score: 81")
-    .openOn(map);
-});
+        return {
+          fillColor: "#eeeeee",
+          fillOpacity: 0.3,
+          color: "#ccc",
+          weight: 0.5
+        };
+      },
+
+      onEachFeature: (feature, layer) => {
+        const geoName = feature.properties.name;
+        const mappedName = countryNameMap[geoName];
+
+        if (mappedName && countryData[mappedName]) {
+          layer.on("click", e => {
+            const d = countryData[mappedName];
+            const s = d.scores;
+
+            let popupHTML = `
+              <div style="min-width:240px">
+                <div style="font-size:16px;font-weight:bold;">
+                  ${mappedName}
+                </div>
+            `;
+
+            if (d.priority) {
+              popupHTML += `
+                <div style="color:#c2185b;font-weight:bold;">
+                  ${d.priorityRank}
+                </div>
+              `;
+            }
+
+            popupHTML += `
+              <div style="margin:6px 0;">
+                <b>Total Market Score:</b>
+                <span style="color:#c2185b">${d.finalScore}/100</span>
+              </div>
+
+              <hr/>
+
+              <b>Parameter Scores</b><br/>
+              Demand Readiness: ${s.demandReadiness}/10<br/>
+              Economic & Trade: ${s.economicTrade}/10<br/>
+              Brand & Cultural Fit: ${s.brandCulturalFit}/10<br/>
+              Premium Growth: ${s.premiumGrowth}/10<br/>
+              Logistics: ${s.logistics}/10<br/>
+              Trade Stability: ${s.tradeStability}/10<br/>
+              Duty Impact (Inverse): ${s.dutyImpact}/10
+              </div>
+            `;
+
+            L.popup()
+              .setLatLng(e.latlng)
+              .setContent(popupHTML)
+              .openOn(map);
+          });
+        }
+      }
+    }).addTo(map);
+  });
