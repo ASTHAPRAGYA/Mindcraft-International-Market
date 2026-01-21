@@ -1,15 +1,28 @@
-console.log("map.js loaded");
+console.log("map.js LOADED");
 
-// ---------------- MAP INIT ----------------
+// ---------------- CREATE MAP (NO INTERACTION) ----------------
 const map = L.map("map", {
-  doubleClickZoom: false   // IMPORTANT
+  zoomControl: true,
+  dragging: true,
+  scrollWheelZoom: false,
+  doubleClickZoom: false,
+  boxZoom: false,
+  keyboard: false
 }).setView([20, 0], 2);
+
+// REMOVE MAP CLICK CAPTURE
+map.off("click");
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// ---------------- NAME MAP ----------------
+// ---------------- FORCE TOP PANE ----------------
+map.createPane("countriesPane");
+map.getPane("countriesPane").style.zIndex = 650;
+map.getPane("countriesPane").style.pointerEvents = "auto";
+
+// ---------------- NAME NORMALISATION ----------------
 const countryNameMap = {
   "Japan": "Japan",
   "United Kingdom": "United Kingdom",
@@ -18,81 +31,64 @@ const countryNameMap = {
   "United States of America": "USA"
 };
 
+// ---------------- CLICK COUNTER ----------------
+let clickCount = 0;
+
 // ---------------- LOAD COUNTRIES ----------------
 fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
-  .then(res => res.json())
+  .then(r => r.json())
   .then(geo => {
 
     console.log("GeoJSON loaded");
 
-    const geoLayer = L.geoJSON(geo, {
-      interactive: true, // 🔥 CRITICAL
+    const layer = L.geoJSON(geo, {
+      pane: "countriesPane",
+      interactive: true,
 
-      style: feature => {
-        const mapped = countryNameMap[feature.properties.name];
-
-        if (mapped && countryData[mapped]) {
+      style: f => {
+        const name = countryNameMap[f.properties.name];
+        if (name && countryData[name]) {
           return {
-            fillColor: countryData[mapped].priority ? "#f4a3c4" : "#b7d7e8",
-            fillOpacity: 0.8,
-            color: "#222",
+            fillColor: countryData[name].priority ? "#f4a3c4" : "#b7d7e8",
+            fillOpacity: 0.9,
+            color: "#000",
             weight: 1
           };
         }
-
         return {
-          fillColor: "#eeeeee",
-          fillOpacity: 0.3,
-          color: "#cccccc",
+          fillColor: "#ddd",
+          fillOpacity: 0.4,
+          color: "#aaa",
           weight: 0.5
         };
       },
 
       onEachFeature: (feature, layer) => {
-        const mapped = countryNameMap[feature.properties.name];
+        const name = countryNameMap[feature.properties.name];
+        if (!name || !countryData[name]) return;
 
-        if (mapped && countryData[mapped]) {
+        layer.on("mousedown", e => {
+          e.originalEvent.preventDefault();
+          e.originalEvent.stopPropagation();
 
-          // bring layer above map
-          layer.bringToFront();
+          clickCount++;
+          console.log(`CLICK ${clickCount}:`, name);
 
-          layer.on("click", e => {
-            console.log("Clicked:", mapped);
+          const d = countryData[name];
+          const s = d.scores;
 
-            const d = countryData[mapped];
-            const s = d.scores;
-
-            let html = `
-              <div style="min-width:240px">
-                <strong>${mapped}</strong><br/>
-            `;
-
-            if (d.priority) {
-              html += `<span style="color:#c2185b">${d.priorityRank}</span><br/>`;
-            }
-
-            html += `
-              <b>Total Score:</b> ${d.finalScore}/100
-              <hr/>
-              Demand: ${s.demandReadiness}/10<br/>
-              Trade: ${s.economicTrade}/10<br/>
-              Brand Fit: ${s.brandCulturalFit}/10<br/>
-              Growth: ${s.premiumGrowth}/10<br/>
-              Logistics: ${s.logistics}/10<br/>
-              Stability: ${s.tradeStability}/10<br/>
-              Duty Impact: ${s.dutyImpact}/10
-              </div>
-            `;
-
-            L.popup({ closeButton: true })
-              .setLatLng(e.latlng)
-              .setContent(html)
-              .openOn(map);
-          });
-        }
+          L.popup({ closeButton: true })
+            .setLatLng(e.latlng)
+            .setContent(`
+              <b>${name}</b><br/>
+              ${d.priority ? `<b>${d.priorityRank}</b><br/>` : ""}
+              <b>Total:</b> ${d.finalScore}/100
+            `)
+            .openOn(map);
+        });
       }
     });
 
-    geoLayer.addTo(map);
-    geoLayer.bringToFront(); // 🔥 ensures click priority
-  });
+    layer.addTo(map);
+  })
+  .catch(err => console.error("GeoJSON ERROR", err));
