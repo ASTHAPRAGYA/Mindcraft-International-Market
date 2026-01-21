@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>KYLR Map Test</title>
+  <meta charset="utf-8">
+  <title>Leaflet Click Test</title>
 
   <link
     rel="stylesheet"
@@ -10,20 +10,35 @@
   />
 
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    #map { height: 90vh; width: 100%; }
+    body { margin: 0; }
+    #map { height: 100vh; }
+    .leaflet-interactive { cursor: pointer !important; }
   </style>
 </head>
 
 <body>
-
-<h2 style="text-align:center;">KYLR Interactive Map</h2>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="countries.js"></script>
-<script src="map.js"></script>
+<script>
+  const map = L.map("map").setView([20, 0], 2);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  // SIMPLE CLICKABLE RECTANGLE
+  const testBox = L.rectangle([[30, 120], [45, 145]], {
+    color: "red",
+    fillColor: "pink",
+    fillOpacity: 0.8
+  }).addTo(map);
+
+  testBox.on("click", function () {
+    alert("CLICK WORKS");
+  });
+</script>
 
 </body>
 </html>
