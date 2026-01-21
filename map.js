@@ -1,81 +1,52 @@
-console.log("KYLR map script loaded");
+alert("map.js is running"); // YOU MUST SEE THIS
 
-// ---- BASIC MAP ----
+console.log("KYLR map JS loaded");
+
 const map = L.map("map").setView([20, 0], 2);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap contributors"
+  attribution: "© OpenStreetMap"
 }).addTo(map);
 
-// ---- TEST CLICK (GLOBAL) ----
-map.on("click", () => {
-  console.log("Map clicked");
+// TEST SHAPES (NO GEOJSON)
+const japan = L.rectangle([[30, 130], [45, 145]], {
+  color: "#c2185b",
+  fillColor: "#f4a3c4",
+  fillOpacity: 0.7
+}).addTo(map);
+
+japan.on("click", () => {
+  alert("Japan clicked");
+  L.popup()
+    .setLatLng([36, 138])
+    .setContent("<b>Japan</b><br>Priority 1<br>Score: 86")
+    .openOn(map);
 });
 
-// ---- DATA ----
-const countryData = {
-  "Japan": { score: 86, priority: "Priority 1" },
-  "United Kingdom": { score: 83, priority: "Priority 2" },
-  "Germany": { score: 81, priority: "Priority 3" },
-  "France": { score: 74 },
-  "United States of America": { score: 68 }
-};
+const uk = L.rectangle([[50, -8], [58, 2]], {
+  color: "#c2185b",
+  fillColor: "#f4a3c4",
+  fillOpacity: 0.7
+}).addTo(map);
 
-// ---- LOAD COUNTRIES ----
-fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
-  .then(res => res.json())
-  .then(geo => {
+uk.on("click", () => {
+  alert("UK clicked");
+  L.popup()
+    .setLatLng([54, -2])
+    .setContent("<b>United Kingdom</b><br>Priority 2<br>Score: 83")
+    .openOn(map);
+});
 
-    console.log("GeoJSON loaded");
+const germany = L.rectangle([[47, 6], [55, 15]], {
+  color: "#c2185b",
+  fillColor: "#f4a3c4",
+  fillOpacity: 0.7
+}).addTo(map);
 
-    L.geoJSON(geo, {
-
-      style: feature => {
-        const name = feature.properties.name;
-
-        if (countryData[name]) {
-          return {
-            fillColor:
-              name === "Japan" ||
-              name === "United Kingdom" ||
-              name === "Germany"
-                ? "#f4a3c4"
-                : "#b7d7e8",
-            fillOpacity: 0.8,
-            color: "#333",
-            weight: 1
-          };
-        }
-
-        return {
-          fillColor: "#eeeeee",
-          fillOpacity: 0.3,
-          color: "#ccc",
-          weight: 0.5
-        };
-      },
-
-      onEachFeature: (feature, layer) => {
-        const name = feature.properties.name;
-
-        layer.on("click", e => {
-          console.log("Country clicked:", name);
-
-          if (countryData[name]) {
-            const info = countryData[name];
-
-            let html = `<b>${name}</b><br/>`;
-            if (info.priority) html += `<b>${info.priority}</b><br/>`;
-            html += `Score: ${info.score}/100`;
-
-            L.popup()
-              .setLatLng(e.latlng)
-              .setContent(html)
-              .openOn(map);
-          }
-        });
-      }
-
-    }).addTo(map);
-  })
-  .catch(err => console.error("GeoJSON error", err));
+germany.on("click", () => {
+  alert("Germany clicked");
+  L.popup()
+    .setLatLng([51, 10])
+    .setContent("<b>Germany</b><br>Priority 3<br>Score: 81")
+    .openOn(map);
+});
